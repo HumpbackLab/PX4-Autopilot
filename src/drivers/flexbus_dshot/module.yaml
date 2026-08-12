@@ -1,0 +1,61 @@
+module_name: Flexbus DShot Output
+actuator_output:
+  config_parameters:
+    - param: 'FB_DSHOT_RATE'
+      label: 'DShot rate'
+  output_groups:
+    - param_prefix: PWM_MAIN
+      channel_label: 'Channel'
+      standard_params:
+        disarmed: { min: 0, max: 0, default: 0 }
+        min: { min: 1, max: 1, default: 1 }
+        max: { min: 1999, max: 1999, default: 1999 }
+        failsafe: { min: 0, max: 0 }
+      supported_actions:
+        set_spin_direction1:
+          actuator_types: [motor]
+        set_spin_direction2:
+          actuator_types: [motor]
+      num_channels: 4
+
+parameters:
+  - group: DShot
+    definitions:
+      FB_DSHOT_RATE:
+        description:
+          short: Flexbus DShot output rate
+          long: |
+            Select the DShot protocol rate used by the Rockchip Flexbus DShot
+            output driver. The new value takes effect after reboot. A rate
+            explicitly supplied with the command-line -r option takes priority.
+        type: enum
+        values:
+          150000: DShot150
+          300000: DShot300
+          600000: DShot600
+        default: 300000
+        reboot_required: true
+      DSHOT_MIN:
+        description:
+          short: Minimum DShot Motor Output
+          long: |
+            Minimum Output Value for DShot in percent. The value depends on the ESC. Make
+            sure to set this high enough so that the motors are always spinning while
+            armed.
+        type: float
+        unit: norm
+        min: 0
+        max: 1
+        decimal: 2
+        increment: 0.01
+        default: 0.055
+      MOT_POLE_COUNT:
+        description:
+          short: Number of magnetic poles of the motors
+          long: |
+            Specify the number of magnetic poles of the motors. This is used to
+            convert electrical RPM returned by bidirectional DShot telemetry to
+            mechanical RPM.
+        type: int32
+        min: 2
+        default: 14
