@@ -1,0 +1,45 @@
+name: Release Humpback Powerfin
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and release
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set release metadata
+        id: release
+        run: |
+          release_time="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          tag_time="$(date -u '+%Y%m%d-%H%M%S')"
+          echo "title=${release_time}" >> "$GITHUB_OUTPUT"
+          echo "tag=powerfin-${tag_time}-${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
+
+      - name: Install PX4 dependencies
+        run: |
+          ./Tools/setup/ubuntu.sh --no-nuttx --no-sim-tools
+          sudo apt-get update
+          sudo apt-get install --yes gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+
+      - name: Build release package
+        run: make humpback_powerfin release
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
+          name: ${{ steps.release.outputs.title }}
+          target_commitish: ${{ github.sha }}
+          files: build/humpback_powerfin_default/px4-*.zip
+          fail_on_unmatched_files: true
