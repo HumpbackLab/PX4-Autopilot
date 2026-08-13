@@ -34,6 +34,9 @@
 #include <SerialImpl.hpp>
 #include <string.h> // strncpy
 #include <termios.h>
+#if defined(__PX4_LINUX)
+#include <sys/ioctl.h>
+#endif
 #include <px4_log.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -202,8 +205,50 @@ bool SerialImpl::configure()
 	termios_state = cfsetispeed(&uart_config, speed);
 
 	if (termios_state < 0) {
+#if defined(__PX4_LINUX)
+		// Apply the framing configuration first, then use the Linux termios2
+		// interface for baud rates not represented by a termios constant.
+		if (tcsetattr(_serial_fd, TCSANOW, &uart_config) < 0) {
+			PX4_ERR("ERR: %d (tcsetattr)", errno);
+			return false;
+		}
+
+		constexpr unsigned TCGETS2_VALUE = 0x802c542a;
+		constexpr unsigned TCSETS2_VALUE = 0x402c542b;
+		constexpr unsigned CBAUD_VALUE = 0010017;
+		constexpr unsigned BOTHER_VALUE = 0010000;
+
+		struct LinuxTermios2 {
+			unsigned c_iflag;
+			unsigned c_oflag;
+			unsigned c_cflag;
+			unsigned c_lflag;
+			unsigned char c_line;
+			unsigned char c_cc[19];
+			unsigned c_ispeed;
+			unsigned c_ospeed;
+		} termios2 {};
+
+		if (ioctl(_serial_fd, TCGETS2_VALUE, &termios2) < 0) {
+			PX4_ERR("ERR: %d (TCGETS2)", errno);
+			return false;
+		}
+
+		termios2.c_cflag &= ~CBAUD_VALUE;
+		termios2.c_cflag |= BOTHER_VALUE;
+		termios2.c_ispeed = _baudrate;
+		termios2.c_ospeed = _baudrate;
+
+		if (ioctl(_serial_fd, TCSETS2_VALUE, &termios2) < 0) {
+			PX4_ERR("ERR: %d (TCSETS2)", errno);
+			return false;
+		}
+
+		return true;
+#else
 		PX4_ERR("ERR: %d (cfsetispeed)", termios_state);
 		return false;
+#endif
 	}
 
 	termios_state = cfsetospeed(&uart_config, speed);
