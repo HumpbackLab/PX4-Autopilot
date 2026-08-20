@@ -1,8 +1,11 @@
 # arm-linux-gnueabihf-gcc toolchain
 
 set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_PROCESSOR arm)
 set(CMAKE_SYSTEM_VERSION 1)
+
+if(NOT CMAKE_SYSTEM_PROCESSOR)
+	set(CMAKE_SYSTEM_PROCESSOR arm)
+endif()
 
 set(triple arm-linux-gnueabihf)
 set(CMAKE_LIBRARY_ARCHITECTURE ${triple})
@@ -15,6 +18,15 @@ set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++)
 set(CMAKE_CXX_COMPILER_TARGET ${triple})
 
 set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PREFIX}-gcc)
+
+# Load compiler flags for the architecture selected by the board configuration.
+set(platform_file
+	"${CMAKE_CURRENT_LIST_DIR}/Platform/${CMAKE_SYSTEM_NAME}-${triple}-${CMAKE_SYSTEM_PROCESSOR}.cmake"
+)
+
+if(EXISTS "${platform_file}")
+	include("${platform_file}")
+endif()
 
 # compiler tools
 find_program(CMAKE_AR ${TOOLCHAIN_PREFIX}-gcc-ar)

@@ -1,5 +1,4 @@
-
-set(cpu_flags "-mcpu=cortex-a9 -mfpu=neon-vfpv3 -mfloat-abi=hard -mthumb-interwork")
+set(cpu_flags "-mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard")
 
 set(CMAKE_C_FLAGS "${cpu_flags}" CACHE STRING "" FORCE)
 set(CMAKE_CXX_FLAGS "${cpu_flags}" CACHE STRING "" FORCE)
