@@ -46,6 +46,7 @@
 #include <drivers/drv_hrt.h>
 #if defined(__PX4_LINUX)
 #include <sys/ioctl.h>
+#include <asm-generic/ioctls.h>
 #include <asm-generic/termbits.h>
 #else
 #include <termios.h>
