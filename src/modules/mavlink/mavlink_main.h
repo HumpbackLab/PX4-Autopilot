@@ -625,11 +625,10 @@ private:
 
 	sockaddr_in		_myaddr {};
 	sockaddr_in		_src_addr {};
-	static constexpr unsigned MAX_BROADCAST_ADDRESSES = 4;
-	sockaddr_in		_bcast_addrs[MAX_BROADCAST_ADDRESSES] {};
+	sockaddr_in		_bcast_addr {};
 
 	bool			_src_addr_initialized{false};
-	unsigned		_broadcast_address_count{0};
+	bool			_broadcast_address_found{false};
 	bool			_broadcast_address_not_found_warned{false};
 	bool			_broadcast_failed_warned{false};
 
