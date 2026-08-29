@@ -3,6 +3,12 @@
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_VERSION 1)
 
+# PowerFin deploys PX4 as a self-contained binary on an OpenHarmony musl
+# userspace. GNU gold 2.37 cannot link this static PIE because it does not
+# support --no-dynamic-linker, so use ld.bfd and link the runtime statically.
+set(USE_LD_GOLD OFF CACHE BOOL "Use GNU gold linker" FORCE)
+set(CMAKE_EXE_LINKER_FLAGS "-static" CACHE STRING "Executable linker flags" FORCE)
+
 if(NOT CMAKE_SYSTEM_PROCESSOR)
 	set(CMAKE_SYSTEM_PROCESSOR arm)
 endif()
