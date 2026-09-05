@@ -1,0 +1,132 @@
+#!/bin/sh
+
+# Resolve only the serial ports used by Powerfin. This avoids the generated
+# rc.serial script scanning every compiled serial driver and MAVLink instance.
+
+serial_ports_used=''
+serial_device='none'
+baud_param=''
+
+resolve_serial_port()
+{
+	serial_config=$(param show -q "$1")
+	case "$serial_config" in
+		10[1-5])
+			serial_index=$((serial_config - 100))
+			serial_device="/dev/ttyS$serial_index"
+			baud_param="SER_TEL${serial_index}_BAUD"
+			;;
+		*) serial_device='none'; baud_param='' ;;
+	esac
+
+	if [ "$serial_device" != 'none' ]
+	then
+		case " $serial_ports_used " in
+			*" $serial_device "*)
+				echo "Conflicting config for $serial_device"
+				serial_device='none'
+				baud_param=''
+				;;
+			*) serial_ports_used="$serial_ports_used $serial_device" ;;
+		esac
+	fi
+}
+
+start_mavlink_instance()
+{
+	mavlink_instance="$1"
+
+	resolve_serial_port "MAV_${mavlink_instance}_CONFIG"
+	if [ "$serial_device" = 'none' ]
+	then
+		return
+	fi
+
+	mavlink_args="-d $serial_device -b p:$baud_param -m p:MAV_${mavlink_instance}_MODE -r p:MAV_${mavlink_instance}_RATE"
+
+	if param compare "MAV_${mavlink_instance}_FORWARD" 1
+	then
+		mavlink_args="$mavlink_args -f"
+	fi
+
+	if param compare "MAV_${mavlink_instance}_RADIO_CTL" 1
+	then
+		mavlink_args="$mavlink_args -s"
+	fi
+
+	if param compare "MAV_${mavlink_instance}_FLOW_CTRL" 0
+	then
+		mavlink_args="$mavlink_args -Z"
+	fi
+
+	if param compare "MAV_${mavlink_instance}_FLOW_CTRL" 1
+	then
+		mavlink_args="$mavlink_args -z"
+	fi
+
+	if param compare "MAV_${mavlink_instance}_MODE" 6
+	then
+		mavlink_args="$mavlink_args -F p:MAV_${mavlink_instance}_HL_FREQ"
+	fi
+
+	echo "Starting MAVLink instance $mavlink_instance on $serial_device"
+	# mavlink_args intentionally expands to separate arguments.
+	# shellcheck disable=SC2086
+	mavlink start $mavlink_args -x
+}
+
+dual_gps_args=''
+resolve_serial_port GPS_2_CONFIG
+if [ "$serial_device" != 'none' ]
+then
+	dual_gps_args="-e $serial_device -g p:$baud_param"
+fi
+
+resolve_serial_port GPS_1_CONFIG
+if [ "$serial_device" != 'none' ]
+then
+	# dual_gps_args intentionally expands to separate arguments.
+	# shellcheck disable=SC2086
+	gps start -d "$serial_device" -b "p:$baud_param" $dual_gps_args
+fi
+
+resolve_serial_port MSP_OSD_CONFIG
+if [ "$serial_device" != 'none' ]
+then
+	msp_osd start -d "$serial_device"
+fi
+
+rc_input_args=''
+resolve_serial_port RC_PORT_CONFIG
+if [ "$serial_device" != 'none' ]
+then
+	rc_input_args="-d $serial_device"
+fi
+
+if [ -n "$rc_input_args" ]
+then
+	# rc_input_args intentionally expands to separate arguments.
+	# shellcheck disable=SC2086
+	if param compare RC_INPUT_PROTO 6
+	then
+		crsf_rc start $rc_input_args
+	else
+		rc_input start $rc_input_args
+	fi
+fi
+
+start_mavlink_instance 0
+start_mavlink_instance 1
+start_mavlink_instance 2
+
+unset -f start_mavlink_instance
+unset -f resolve_serial_port
+unset serial_ports_used
+unset serial_config
+unset serial_index
+unset serial_device
+unset baud_param
+unset dual_gps_args
+unset rc_input_args
+unset mavlink_instance
+unset mavlink_args
