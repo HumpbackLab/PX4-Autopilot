@@ -3,6 +3,16 @@
 # Resolve only the serial ports used by Powerfin. This avoids the generated
 # rc.serial script scanning every compiled serial driver and MAVLink instance.
 
+# Expose the parameters consumed by this board-specific serial startup script.
+# The used set is rebuilt on every boot, so mark them once per boot here.
+param touch \
+	GPS_1_CONFIG GPS_2_CONFIG \
+	MSP_OSD_CONFIG RC_PORT_CONFIG RC_INPUT_PROTO \
+	SER_TEL1_BAUD SER_TEL2_BAUD SER_TEL3_BAUD SER_TEL4_BAUD SER_TEL5_BAUD \
+	MAV_0_CONFIG MAV_0_FORWARD MAV_0_RADIO_CTL MAV_0_FLOW_CTRL MAV_0_MODE MAV_0_RATE MAV_0_HL_FREQ \
+	MAV_1_CONFIG MAV_1_FORWARD MAV_1_RADIO_CTL MAV_1_FLOW_CTRL MAV_1_MODE MAV_1_RATE MAV_1_HL_FREQ \
+	MAV_2_CONFIG MAV_2_FORWARD MAV_2_RADIO_CTL MAV_2_FLOW_CTRL MAV_2_MODE MAV_2_RATE MAV_2_HL_FREQ
+
 serial_ports_used=''
 serial_device='none'
 baud_param=''
