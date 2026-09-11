@@ -169,6 +169,11 @@ void SC7U22::RunImpl()
 		return;
 	}
 
+	float temperature = NAN;
+	ReadTemperature(temperature);
+	_px4_accel.set_temperature(temperature);
+	_px4_gyro.set_temperature(temperature);
+
 	if (!FIFORead(timestamp_sample, complete_samples)) {
 		perf_cancel(_sample_perf);
 		return;
@@ -204,6 +209,20 @@ uint16_t SC7U22::FIFOReadCount(uint8_t &status)
 
 	status = fifo_status[0];
 	return ((fifo_status[0] & FIFO_STAT0_COUNT_HIGH_MASK) << 8) | fifo_status[1];
+}
+
+bool SC7U22::ReadTemperature(float &temperature)
+{
+	uint8_t temperature_data[2] {};
+
+	if (_interface->read(static_cast<uint8_t>(Register::TEMP_H), temperature_data, sizeof(temperature_data)) != PX4_OK) {
+		perf_count(_bad_transfer_perf);
+		return false;
+	}
+
+	const int16_t raw_temperature = Combine(temperature_data[0], temperature_data[1]);
+	temperature = static_cast<float>(raw_temperature) / 512.f + 23.f;
+	return true;
 }
 
 bool SC7U22::FIFORead(const hrt_abstime &timestamp_sample, uint8_t samples)

@@ -74,6 +74,8 @@ enum class Register : uint8_t {
 	FIFO_STAT0 = 0x1F,
 	FIFO_STAT1 = 0x20,
 	FIFO_DATA = 0x21,
+	TEMP_H = 0x22,
+	TEMP_L = 0x23,
 	ACC_CONF = 0x40,
 	ACC_RANGE = 0x41,
 	GYR_CONF = 0x42,

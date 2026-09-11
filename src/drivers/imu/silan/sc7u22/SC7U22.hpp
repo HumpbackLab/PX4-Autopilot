@@ -70,6 +70,7 @@ private:
 	bool FIFORead(const hrt_abstime &timestamp_sample, uint8_t samples);
 	uint16_t FIFOReadCount(uint8_t &status);
 	void FIFOReset();
+	bool ReadTemperature(float &temperature);
 
 	uint8_t RegisterRead(Silan_SC7U22::Register reg);
 	int RegisterWrite(Silan_SC7U22::Register reg, uint8_t value);
