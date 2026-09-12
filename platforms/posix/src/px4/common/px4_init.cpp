@@ -40,9 +40,22 @@
 #include <px4_platform_common/px4_work_queue/WorkQueueManager.hpp>
 #include <uORB/uORB.h>
 
+#include <stdint.h>
+
 #if defined(CONFIG_MODULES_MUORB_APPS)
 extern "C" { int muorb_init(); }
 #endif
+
+/**
+ * Board-specific application initialization hook.
+ *
+ * This mirrors the NuttX board_app_initialize() entry point. Boards that do
+ * not need POSIX-specific initialization use this weak default implementation.
+ */
+extern "C" __attribute__((weak)) int board_app_initialize(uintptr_t)
+{
+	return PX4_OK;
+}
 
 int px4_platform_init(void)
 {
@@ -70,6 +83,8 @@ int px4_platform_init(void)
 #endif
 
 	px4_log_initialize();
+
+	board_app_initialize(0);
 
 	return PX4_OK;
 }
