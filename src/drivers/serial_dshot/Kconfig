@@ -1,0 +1,5 @@
+menuconfig DRIVERS_SERIAL_DSHOT
+	bool "Serial to bidirectional DShot adapter"
+	default n
+	---help---
+		Enable DShot output through the AT32 serial-to-bidirectional-DShot adapter.

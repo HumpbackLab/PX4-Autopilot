@@ -1,0 +1,85 @@
+module_name: Serial DShot Output
+serial_config:
+  - command: serial_dshot start -d ${SERIAL_DEV}
+    port_config_param:
+      name: SD_DSHOT_CFG
+      group: DShot
+actuator_output:
+  config_parameters:
+    - param: 'SD_DSHOT_RATE'
+      label: 'DShot rate'
+  output_groups:
+    - param_prefix: PWM_MAIN
+      channel_label: 'Channel'
+      standard_params:
+        disarmed: { min: 0, max: 0, default: 0 }
+        min: { min: 1, max: 1, default: 1 }
+        max: { min: 1999, max: 1999, default: 1999 }
+        failsafe: { min: 0, max: 0 }
+      supported_actions:
+        set_spin_direction1:
+          actuator_types: [motor]
+        set_spin_direction2:
+          actuator_types: [motor]
+      num_channels: 4
+
+parameters:
+  - group: DShot
+    definitions:
+      SD_DSHOT_RATE:
+        description:
+          short: Serial adapter DShot rate
+          long: DShot rate configured in the AT32 serial DShot adapter at startup.
+        type: enum
+        values:
+          150: DShot150
+          300: DShot300
+          600: DShot600
+          1200: DShot1200
+        default: 300
+        reboot_required: true
+      SD_DSHOT_BIDIR:
+        description:
+          short: Enable bidirectional DShot
+          long: Enable eRPM telemetry from the AT32 serial DShot adapter. The adapter firmware only supports bidirectional operation with DShot300 and DShot600.
+        type: boolean
+        default: 1
+        reboot_required: true
+      SD_DSHOT_BAUD:
+        description:
+          short: Serial DShot adapter baud rate
+          long: Baud rate already configured in the AT32 adapter. Changing this parameter does not reprogram the adapter flash.
+        type: int32
+        min: 9600
+        max: 3000000
+        default: 1000000
+        reboot_required: true
+      SD_DSHOT_TMO:
+        description:
+          short: Adapter motor command timeout
+          long: Time without a serial motor command before the AT32 adapter stops DShot output.
+        type: int32
+        unit: ms
+        min: 100
+        max: 5000
+        default: 500
+        reboot_required: true
+      SD_MOT_POLES:
+        description:
+          short: Number of motor magnetic poles
+          long: Number of magnetic poles used to convert bidirectional DShot electrical period to mechanical RPM.
+        type: int32
+        min: 2
+        max: 400
+        default: 14
+      DSHOT_MIN:
+        description:
+          short: Minimum DShot Motor Output
+          long: Minimum armed motor output in normalized units.
+        type: float
+        unit: norm
+        min: 0
+        max: 1
+        decimal: 2
+        increment: 0.01
+        default: 0.055
