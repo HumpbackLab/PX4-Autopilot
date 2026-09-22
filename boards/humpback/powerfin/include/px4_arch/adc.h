@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2026 PX4 Development Team. All rights reserved.
+ *   Copyright (C) 2026 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,39 +31,6 @@
  *
  ****************************************************************************/
 
-/**
- * @file board_config.h
- *
- * RPI internal definitions
- */
-
 #pragma once
 
-#define BOARD_OVERRIDE_UUID "RPIID00000000000" // must be of length 16
-#define PX4_SOC_ARCH_ID     PX4_SOC_ARCH_ID_RPI
-
-
-// I2C
-#define CONFIG_I2C 1
-#define PX4_NUMBER_I2C_BUSES    2
-
-
-// SPI
-#define CONFIG_SPI 1
-#define BOARD_SPI_BUS_MAX_BUS_ITEMS 2
-
-#define DIRECT_PWM_OUTPUT_CHANNELS 8
-
-
-// IIO battery-voltage reports battery-side voltage, including the divider.
-#define ADC_CHANNELS (1 << 0)
-#define BOARD_BATTERY1_V_DIV 1.0f
-
-#define ADC_BATTERY_VOLTAGE_CHANNEL	0
-#define ADC_BATTERY_CURRENT_CHANNEL	-1
-#define ADC_AIRSPEED_VOLTAGE_CHANNEL 2
-
-#define ADC_DP_V_DIV 1.0f
-
-#include <system_config.h>
-#include <px4_platform_common/board_common.h>
+#define SYSTEM_ADC_BASE 0
