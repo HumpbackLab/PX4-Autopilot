@@ -32,8 +32,23 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
 
-      - name: Build release package
+      - name: Install ARM musl toolchain
+        run: |
+          curl --fail --location --retry 3 \
+            --output "$RUNNER_TEMP/arm-linux-musleabihf-cross.tgz" \
+            https://github.com/musl-cc/musl.cc/releases/download/v0.0.1/arm-linux-musleabihf-cross.tgz
+          echo '11e155a090789c854afb5d91e57c81f441ccdb92f7f277789c3a6d5884a68e58  '"$RUNNER_TEMP/arm-linux-musleabihf-cross.tgz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/arm-linux-musleabihf-cross.tgz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/arm-linux-musleabihf-cross/bin" >> "$GITHUB_PATH"
+
+      - name: Build glibc release package
         run: make humpback_powerfin release
+
+      - name: Build musl release package
+        run: |
+          make humpback_powerfin_musl release
+          archive="build/humpback_powerfin_musl/px4-$(git rev-parse --short HEAD).zip"
+          mv "$archive" "${archive%.zip}-musl.zip"
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
@@ -41,5 +56,7 @@ jobs:
           tag_name: ${{ steps.release.outputs.tag }}
           name: ${{ steps.release.outputs.title }}
           target_commitish: ${{ github.sha }}
-          files: build/humpback_powerfin_default/px4-*.zip
+          files: |
+            build/humpback_powerfin_default/px4-*.zip
+            build/humpback_powerfin_musl/px4-*-musl.zip
           fail_on_unmatched_files: true
