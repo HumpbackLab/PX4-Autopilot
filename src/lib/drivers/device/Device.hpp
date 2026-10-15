@@ -152,6 +152,7 @@ public:
 		DeviceBusType_SIMULATION = 4,
 		DeviceBusType_SERIAL = 5,
 		DeviceBusType_MAVLINK = 6,
+		DeviceBusType_IIO = 7,
 	};
 
 	/*
@@ -202,6 +203,9 @@ public:
 
 		case DeviceBusType_MAVLINK:
 			return "MAVLINK";
+
+		case DeviceBusType_IIO:
+			return "IIO";
 
 		case DeviceBusType_UNKNOWN:
 		default:

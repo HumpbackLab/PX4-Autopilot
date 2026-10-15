@@ -265,6 +265,7 @@ bool DeviceExternal(uint32_t device_id)
 		break;
 
 	case device::Device::DeviceBusType_SIMULATION:
+	case device::Device::DeviceBusType_IIO:
 		external = false;
 		break;
 
